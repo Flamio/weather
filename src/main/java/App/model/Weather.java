@@ -1,14 +1,18 @@
 package App.model;
 
-import org.springframework.stereotype.Indexed;
 
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 
+
 @Entity
 @Table(name = "weather", indexes = @Index(name = "date_index", columnList = "date"))
-public class Weather extends DaoEntity {
+public class Weather {
+
+    @Id
+    @GeneratedValue(strategy= GenerationType.AUTO)
+    private long id;
 
     public Date getDate() {
         return date;
@@ -21,28 +25,44 @@ public class Weather extends DaoEntity {
     @Column(nullable = false)
     private Date date;
 
-    @Column(nullable = false)
-    private int temperature;
+    @OneToMany(mappedBy = "weather", cascade=CascadeType.ALL)
+    private List<Precipitation> precipitations;
 
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "weather_event_binding",
-            joinColumns = @JoinColumn(name = "weather_id"),
-            inverseJoinColumns = @JoinColumn(name = "event_id"))
-    private List<Event> events;
+    @OneToOne(mappedBy = "weather", cascade=CascadeType.ALL)
+    private EarthQuake earthQuake;
 
-    public List<Event> getEvents() {
-        return events;
+    @OneToOne(mappedBy = "weather", cascade=CascadeType.ALL)
+    private Wind wind;
+
+    public List<Precipitation> getPrecipitations() {
+        return precipitations;
     }
 
-    public void setEvents(List<Event> events) {
-        this.events = events;
+    public void setPrecipitations(List<Precipitation> precipitations) {
+        this.precipitations = precipitations;
     }
 
-    public int getTemperature() {
-        return temperature;
+    public long getId() {
+        return id;
     }
 
-    public void setTemperature(int temperature) {
-        this.temperature = temperature;
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public EarthQuake getEarthQuake() {
+        return earthQuake;
+    }
+
+    public void setEarthQuake(EarthQuake earthQuake) {
+        this.earthQuake = earthQuake;
+    }
+
+    public Wind getWind() {
+        return wind;
+    }
+
+    public void setWind(Wind wind) {
+        this.wind = wind;
     }
 }
