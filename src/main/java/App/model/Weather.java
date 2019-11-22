@@ -1,11 +1,27 @@
-package App.dao;
+package App.model;
+
+import org.springframework.stereotype.Indexed;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 @Entity
+@Table(name = "weather", indexes = @Index(name = "date_index", columnList = "date"))
 public class Weather extends DaoEntity {
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    @Column(nullable = false)
+    private Date date;
+
+    @Column(nullable = false)
     private int temperature;
 
     @ManyToMany(cascade = CascadeType.ALL)
@@ -29,8 +45,4 @@ public class Weather extends DaoEntity {
     public void setTemperature(int temperature) {
         this.temperature = temperature;
     }
-
-
-
-
 }
