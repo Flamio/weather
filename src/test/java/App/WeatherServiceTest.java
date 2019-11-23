@@ -20,7 +20,7 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class WeatherServiceTest {
 
-    private WeatherService service;
+    private WeatherServiceImpl service;
 
     @Mock
     private WeatherRepository repository;
@@ -29,7 +29,7 @@ public class WeatherServiceTest {
     public void getWeatherTest() throws ParseException {
 
         //assert
-        service = new WeatherService();
+        service = new WeatherServiceImpl();
         service.setRepository(repository);
 
 
