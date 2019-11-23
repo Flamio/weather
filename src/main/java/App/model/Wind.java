@@ -1,15 +1,25 @@
 package App.model;
 
+import App.dto.WindDto;
+
 import javax.persistence.*;
 
 @Entity
 public class Wind {
+
+    public Wind(WindDto dto) {
+        speed = dto.getSpeed();
+    }
+
+    public Wind() {
+    }
+
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private long id;
     private float speed;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="weather_id", nullable = false)
     Weather weather;
 

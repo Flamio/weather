@@ -1,11 +1,20 @@
 package App.model;
 
+import App.dto.PrecipitationDto;
+
 import javax.persistence.*;
-import java.util.List;
-import java.util.Set;
 
 @Entity
 public class Precipitation {
+
+    public Precipitation() {
+    }
+
+    public Precipitation(PrecipitationDto dto) {
+        numberOfDailyAllowances = dto.getNumberOfDailyAllowances();
+        intensity = dto.getIntensity();
+        temperature = dto.getTemperature();
+    }
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
@@ -16,7 +25,8 @@ public class Precipitation {
     private float temperature;
     private String name;
 
-    @ManyToOne
+
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="weather_id", nullable=false)
     Weather weather;
 

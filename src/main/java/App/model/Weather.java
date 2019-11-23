@@ -10,9 +10,13 @@ import java.util.List;
 @Table(name = "weather", indexes = @Index(name = "date_index", columnList = "date"))
 public class Weather {
 
+    public Weather() {
+    }
+
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private long id;
+
 
     public Date getDate() {
         return date;
@@ -22,7 +26,9 @@ public class Weather {
         this.date = date;
     }
 
-    @Column(nullable = false)
+    @Basic
+    @Temporal(TemporalType.DATE)
+    @Column(nullable = false, unique = true)
     private Date date;
 
     @OneToMany(mappedBy = "weather", cascade=CascadeType.ALL)

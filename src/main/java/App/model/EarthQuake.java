@@ -1,9 +1,18 @@
 package App.model;
 
+import App.dto.EarthQuakeDto;
+
 import javax.persistence.*;
 
 @Entity
 public class EarthQuake {
+
+    public EarthQuake() {
+    }
+
+    public EarthQuake(EarthQuakeDto dto) {
+        magnitudeScaleValue = dto.getMagnitudeScaleValue();
+    }
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
@@ -11,7 +20,7 @@ public class EarthQuake {
 
     private float magnitudeScaleValue;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="weather_id", nullable = false)
     Weather weather;
 

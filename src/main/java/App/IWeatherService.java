@@ -1,9 +1,11 @@
 package App;
 
-import App.model.Weather;
+import App.dto.WeatherDto;
 
 public interface IWeatherService {
-    Weather get(long id);
+    WeatherDto get(long id);
 
-    void add(Weather weather);
+    void add(WeatherDto weather);
+
+  //  Weather getByDate(String date) throws ParseException;
 }
