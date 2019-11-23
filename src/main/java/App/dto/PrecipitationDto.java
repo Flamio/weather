@@ -2,11 +2,14 @@ package App.dto;
 
 public class PrecipitationDto extends Event{
 
-    public PrecipitationDto(String type, int numberOfDailyAllowances, float intensity, float temperature) {
+    private String name;
+
+    public PrecipitationDto(String type, int numberOfDailyAllowances, float intensity, float temperature, String name) {
         super(type);
         this.numberOfDailyAllowances = numberOfDailyAllowances;
         this.intensity = intensity;
         this.temperature = temperature;
+        this.name = name;
     }
 
     private int numberOfDailyAllowances;
@@ -35,5 +38,13 @@ public class PrecipitationDto extends Event{
 
     public void setTemperature(float temperature) {
         this.temperature = temperature;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

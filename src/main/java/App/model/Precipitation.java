@@ -23,7 +23,6 @@ public class Precipitation {
     private int numberOfDailyAllowances;
     private float intensity;
     private float temperature;
-    private String name;
 
 
     @ManyToOne(cascade = CascadeType.ALL)
@@ -60,14 +59,6 @@ public class Precipitation {
 
     public void setId(long id) {
         this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public Weather getWeather() {

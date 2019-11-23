@@ -16,6 +16,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class WeatherServiceImpl implements WeatherService {
@@ -49,12 +50,19 @@ public class WeatherServiceImpl implements WeatherService {
 
         EarthQuake earthQuake = weatherDao.getEarthQuake();
         Wind wind = weatherDao.getWind();
+        List<Precipitation> precipitations = weatherDao.getPrecipitations();
 
         if (earthQuake != null)
             weatherDto.getEvents().add(new EarthQuakeDto("earthQuake", earthQuake.getMagnitudeScaleValue()));
 
         if (wind != null)
             weatherDto.getEvents().add(new WindDto("wind", wind.getSpeed()));
+
+        precipitations.stream().forEach(p -> {
+            weatherDto.getEvents().add(
+                    new PrecipitationDto("precipitation", p.getNumberOfDailyAllowances(), p.getIntensity(), p.getTemperature(), p.getTemperature() <= 0 ? "snow" : "rain"));
+        });
+
         return weatherDto;
     }
 
