@@ -2,9 +2,12 @@ package App.dto;
 
 public class WindDto extends Event {
 
-    public WindDto(String type, float speed) {
+    private String name;
+
+    public WindDto(String type, float speed, String name) {
         super(type);
         this.speed = speed;
+        this.name = name;
     }
 
     private float speed;
@@ -15,5 +18,13 @@ public class WindDto extends Event {
 
     public void setSpeed(float speed) {
         this.speed = speed;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

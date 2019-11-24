@@ -16,7 +16,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class WeatherServiceImpl implements WeatherService {
@@ -31,8 +30,7 @@ public class WeatherServiceImpl implements WeatherService {
     }
 
     @Override
-    public WeatherDto get(long id)
-    {
+    public WeatherDto get(long id) {
         Weather weatherDao = repository.findById(id).orElse(null);
 
         if (weatherDao == null)
@@ -56,7 +54,7 @@ public class WeatherServiceImpl implements WeatherService {
             weatherDto.getEvents().add(new EarthQuakeDto("earthQuake", earthQuake.getMagnitudeScaleValue()));
 
         if (wind != null)
-            weatherDto.getEvents().add(new WindDto("wind", wind.getSpeed()));
+            weatherDto.getEvents().add(new WindDto("wind", wind.getSpeed(), wind.getName()));
 
         precipitations.stream().forEach(p -> {
             weatherDto.getEvents().add(
@@ -79,7 +77,7 @@ public class WeatherServiceImpl implements WeatherService {
         weatherDao.setDate(weather.getDate());
 
         if (weather.getEvents() == null)
-            return  weatherDao;
+            return weatherDao;
 
         EarthQuakeDto earthQuake = (EarthQuakeDto) weather.getEvents().stream().filter(event -> event.getClass().isAssignableFrom(EarthQuakeDto.class)).findFirst().orElse(null);
         if (earthQuake != null) {
@@ -90,6 +88,7 @@ public class WeatherServiceImpl implements WeatherService {
 
         WindDto wind = (WindDto) weather.getEvents().stream().filter(event -> event.getClass().isAssignableFrom(WindDto.class)).findFirst().orElse(null);
         if (wind != null) {
+            wind.setName(getWindName(wind.getSpeed()));
             Wind windDao = new Wind(wind);
             windDao.setWeather(weatherDao);
             weatherDao.setWind(windDao);
@@ -104,6 +103,17 @@ public class WeatherServiceImpl implements WeatherService {
         weatherDao.setPrecipitations(precipitationDao);
 
         return weatherDao;
+    }
+
+    private String getWindName(float speed) {
+        if (speed < 2f)
+            return "calm";
+        else if (speed >= 2f && speed < 47f)
+            return "moderate";
+        else if (speed >= 47 && speed < 64f)
+            return "storm";
+
+        return "hurricane";
     }
 
     @Override

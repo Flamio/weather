@@ -66,6 +66,7 @@ public class WeatherServiceTest {
         Wind wind = new Wind();
         wind.setWeather(weather);
         wind.setSpeed(55.4f);
+        wind.setName("storm");
 
         weather.setDate(dateFormat.parse("01.01.2000"));
         weather.setPrecipitations(Arrays.asList(precipitation, precipitation2));
@@ -83,7 +84,7 @@ public class WeatherServiceTest {
         assertThat(weatherDto.getEvents().stream().filter(event -> event.getClass().isAssignableFrom(WindDto.class))
                 .anyMatch(event -> {
                     WindDto windDto = (WindDto) event;
-                    return windDto.getSpeed() == 55.4f;
+                    return windDto.getSpeed() == 55.4f && windDto.getName().equals("storm");
                 })).isTrue();
         assertThat(weatherDto.getEvents().stream().filter(event -> event.getClass().isAssignableFrom(EarthQuakeDto.class))
                 .anyMatch(event -> {
@@ -111,7 +112,7 @@ public class WeatherServiceTest {
     @Test
     public void weatherSaveTest() throws ParseException {
 
-        //assert
+        //arrange
         service = new WeatherServiceImpl();
         service.setRepository(repository);
 
@@ -120,7 +121,7 @@ public class WeatherServiceTest {
         WeatherDto weatherDto = new WeatherDto();
         weatherDto.setDate(dateFormat.parse("11.11.2011"));
         weatherDto.setEvents(Arrays.asList(
-                new WindDto("wind", 1.5f),
+                new WindDto("wind", 1.5f, "calm"),
                 new PrecipitationDto("precipitation", 10, 5, 20, "rain")));
 
         //act
@@ -132,8 +133,31 @@ public class WeatherServiceTest {
         Weather weatherDaoCaptorValue = weatherDaoCaptor.getValue();
         assertThat(weatherDaoCaptorValue.getDate()).isEqualTo(dateFormat.parse("11.11.2011"));
         assertThat(weatherDaoCaptorValue.getWind().getSpeed()).isEqualTo(1.5f);
+        assertThat(weatherDaoCaptorValue.getWind().getName()).isEqualTo("calm");
         assertThat(weatherDaoCaptorValue.getPrecipitations().get(0).getTemperature()).isEqualTo(20.0f);
         assertThat(weatherDaoCaptorValue.getPrecipitations().get(0).getIntensity()).isEqualTo(5);
         assertThat(weatherDaoCaptorValue.getPrecipitations().get(0).getNumberOfDailyAllowances()).isEqualTo(10);
+    }
+
+    @Test
+    public void calmSaveTest() throws ParseException {
+        //arrange
+        service = new WeatherServiceImpl();
+        service.setRepository(repository);
+
+        given(repository.save(ArgumentMatchers.any())).willReturn(new Weather());
+
+        WeatherDto weatherDto = new WeatherDto();
+        weatherDto.setDate(dateFormat.parse("11.11.2011"));
+        weatherDto.setEvents(Arrays.asList(
+                new WindDto("wind", 1.5f, "")));
+        //act
+        service.add(weatherDto);
+
+        //assert
+        verify(repository, times(1)).save(weatherDaoCaptor.capture());
+
+        Weather weatherDaoCaptorValue = weatherDaoCaptor.getValue();
+        assertThat(weatherDaoCaptorValue.getWind().getName()).isEqualTo("calm");
     }
 }

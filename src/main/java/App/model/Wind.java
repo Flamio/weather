@@ -7,8 +7,11 @@ import javax.persistence.*;
 @Entity
 public class Wind {
 
+    private String name;
+
     public Wind(WindDto dto) {
         speed = dto.getSpeed();
+        name = dto.getName();
     }
 
     public Wind() {
@@ -45,5 +48,13 @@ public class Wind {
 
     public void setWeather(Weather weather) {
         this.weather = weather;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
