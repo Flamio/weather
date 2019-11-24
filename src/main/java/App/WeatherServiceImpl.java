@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -66,7 +67,11 @@ public class WeatherServiceImpl implements WeatherService {
 
     @Transactional
     @Override
-    public long add(WeatherDto weather) {
+    public long add(WeatherDto weather) throws IllegalArgumentException {
+        Weather existingWeather = repository.findByDate(weather.getDate()).orElse(null);
+        if (existingWeather != null)
+            throw new IllegalArgumentException("duplicate date");
+
         Weather weatherDao = weatherDtoToDao(weather);
         Weather saved = repository.save(weatherDao);
         return saved.getId();
@@ -123,5 +128,15 @@ public class WeatherServiceImpl implements WeatherService {
             return null;
 
         return weatherDaoToDto(weatherByDate);
+    }
+
+    @Override
+    @Transactional
+    public boolean delete(long id) {
+        Weather existingWeather = repository.findById(id).orElse(null);
+        if (existingWeather == null)
+            return false;
+        repository.delete(existingWeather);
+        return true;
     }
 }

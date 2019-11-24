@@ -41,10 +41,24 @@ public class WeatherController {
 
     @PostMapping(value = "/register")
     public ResponseEntity add(@RequestBody WeatherDto weather, UriComponentsBuilder builder) {
-        long newId = service.add(weather);
-        UriComponents uriComponents =
-                builder.path("/api/{id}").buildAndExpand(newId);
-        return ResponseEntity.created(uriComponents.toUri()).build();
+        try {
+            long newId = service.add(weather);
+
+            UriComponents uriComponents =
+                    builder.path("/api/{id}").buildAndExpand(newId);
+            return ResponseEntity.created(uriComponents.toUri()).build();
+        }
+        catch (IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping(value = "/delete/{id}")
+    public ResponseEntity delete(@PathVariable(name = "id") long id)
+    {
+        boolean deleted = service.delete(id);
+        return  deleted ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
     }
 
 }
