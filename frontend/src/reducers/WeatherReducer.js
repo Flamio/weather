@@ -83,7 +83,7 @@ const WeatherReducer = (state = initState, action) => {
                     ...state,
                 }
                 s.date = `${s.date.getDate()}.${s.date.getMonth() + 1}.${s.date.getFullYear()}`;
-                postData("weather/api/register", s).then(
+                postData("api/register", s).then(
                     r => r.text()).then(d => {
                         if (d!= "")
                             alert("Ошибка! " + d);

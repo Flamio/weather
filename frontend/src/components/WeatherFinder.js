@@ -29,7 +29,7 @@ class WeatherFinder extends React.Component {
     }
 
     findWeather = () => {
-        this.getData(`weather/api/find?date=${this.state.date.getDate()}.${this.state.date.getMonth() + 1}.${this.state.date.getFullYear()}`).then(r => {
+        this.getData(`api/find?date=${this.state.date.getDate()}.${this.state.date.getMonth() + 1}.${this.state.date.getFullYear()}`).then(r => {
             if (r.events.length == 0)
                 alert("Погодные явления отсутствуют на данную дату");
             this.setState({ data: r })
@@ -38,7 +38,7 @@ class WeatherFinder extends React.Component {
 
     deleteWeather = () => {
 
-        this.deleteData(`weather/api/delete/${this.state.data.id}`).then(r => {
+        this.deleteData(`api/delete/${this.state.data.id}`).then(r => {
             if (r.status == 404)
                 alert("Не найдено!")
             else if (r.status == 200) {

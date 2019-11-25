@@ -1,5 +1,6 @@
 FROM tomcat
- 
-RUN apt update && apt install postgresql
 
-ADD target/weather.war /usr/local/tomcat/webapps
+ADD backend/target/weather.war /usr/local/tomcat/webapps
+RUN mkdir /usr/local/tomcat/webapps/weather
+ADD frontend/build/static /usr/local/tomcat/webapps/weather/static
+ADD frontend/build/static/*.* /usr/local/tomcat/webapps/weather
