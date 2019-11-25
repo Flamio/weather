@@ -8,11 +8,12 @@ class WeatherWidget extends React.Component {
     constructor() {
         super();
         this.names.set("wind", "Ветер");
-        this.names.set("earthQuake", "Землятрясение");
+        this.names.set("earthQuake", "Землетрясение");
         this.names.set("precipitation", "Осадки");
         this.names.set('moderate', "умеренный");
         this.names.set('calm', "штиль");
         this.names.set('storm', "шторм");
+        this.names.set('hurricane', 'ураган'); 
         this.names.set('rain', "дождь");
         this.names.set('snow', "снег");
     }
@@ -21,14 +22,14 @@ class WeatherWidget extends React.Component {
         switch (event.type) {
             case 'wind':
                 return `${this.names.get(event.name)}, скорость ${event.speed} км/ч`;
-            case 'preticipation':
-                return `${this.names.get(event.name)}, температура ${event.temperature} градусов Цельсия, кол-во суточных норм ${event.numberOfDailyAllowances}, итенсивность ${event.itencity}`;
+            case 'precipitation':
+                return `${this.names.get(event.name)}, температура ${event.temperature} градусов Цельсия, кол-во суточных норм - ${event.numberOfDailyAllowances}, итенсивность - ${event.intensity}`;
             case 'earthQuake':
                 return `${event.magnitudeScaleValue} баллов`;
         }
     }
 
-    getEvents = () => {
+    getEvents = () => {        
         var rows = [];
         for (var i = 0; i < this.props.data.events.length; i++) {
             rows.push(<tr>
@@ -41,12 +42,13 @@ class WeatherWidget extends React.Component {
 
     render() {
         return (
-            <table className="table">
-                {console.log(this.props.data)}
+            <div>
+            <table className="table table-bordered">                
                 <tbody>
                     {this.getEvents()}
                 </tbody>
             </table>
+            </div>
         )
     }
 }

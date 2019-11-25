@@ -10,28 +10,55 @@ class WeatherFinder extends React.Component {
         this.setState({ date: d });
     }
 
-    getData = (url = '', data = {}) => {
+    getData = (url = '') => {
         return fetch(url, {
             method: 'GET',
-        }).then(response => response.json()
+        }).then(response => {
+            if (response.status == 404)
+                alert("Не найдено!");
+
+            return response.json()
+        }
         );
     }
 
-    findWeather = () =>
-    {
-        /*this.props.dispatch({
-            type: "FIND_WEATHER",
-            data: { date: this.state.date}
-        })*/
-        this.getData(`weather/api/find?date=${this.state.date.getDate()}.${this.state.date.getMonth() + 1}.${this.state.date.getFullYear()}`).then(r =>
-            this.setState({data:r}))
+    deleteData = (url = '') => {
+        return fetch(url, {
+            method: 'DELETE',
+        });
+    }
+
+    findWeather = () => {
+        this.getData(`weather/api/find?date=${this.state.date.getDate()}.${this.state.date.getMonth() + 1}.${this.state.date.getFullYear()}`).then(r => {
+            if (r.events.length == 0)
+                alert("Погодные явления отсутствуют на данную дату");
+            this.setState({ data: r })
+        })
+    }
+
+    deleteWeather = () => {
+
+        this.deleteData(`weather/api/delete/${this.state.data.id}`).then(r => {
+            if (r.status == 404)
+                alert("Не найдено!")
+            else if (r.status == 200) {
+                alert("Успех!");
+                this.setState({
+                    data: {
+                        events: [],
+                        date: {}
+                    }
+                })
+            }
+        }
+        )
     }
 
     state = {
         date: "",
-        data:{
-            events:[],
-            date:{}
+        data: {
+            events: [],
+            date: {}
         }
     }
 
@@ -50,12 +77,12 @@ class WeatherFinder extends React.Component {
                                 onChange={this.dateChanged}
                                 dateFormat="dd.MM.yyyy"
                                 className='form-control' />
-
-                            <button onClick={this.findWeather} className="btn btn-success">Поиск</button>
+                            <button onClick={this.findWeather} className="btn btn-primary">Поиск</button>
+                            <button onClick={this.deleteWeather} className="btn btn-success">Удалить</button>
                         </div>
                         <div className="card col-md-9">
                             <div className="card-body">
-                                <WeatherWidget data={this.state.data}/>
+                                <WeatherWidget data={this.state.data} />
                             </div>
                         </div>
                     </div>
