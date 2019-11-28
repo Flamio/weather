@@ -17,6 +17,13 @@ public class Weather {
     @GeneratedValue(strategy= GenerationType.AUTO)
     private long id;
 
+    @Basic
+    @Temporal(TemporalType.DATE)
+    @Column(nullable = false, unique = true)
+    private Date date;
+
+    @OneToMany(mappedBy = "weather", cascade = CascadeType.ALL)
+    private List<EventValue> eventValues;
 
     public Date getDate() {
         return date;
@@ -24,28 +31,6 @@ public class Weather {
 
     public void setDate(Date date) {
         this.date = date;
-    }
-
-    @Basic
-    @Temporal(TemporalType.DATE)
-    @Column(nullable = false, unique = true)
-    private Date date;
-
-    @OneToMany(mappedBy = "weather", cascade=CascadeType.ALL)
-    private List<Precipitation> precipitations;
-
-    @OneToOne(mappedBy = "weather", cascade=CascadeType.ALL)
-    private EarthQuake earthQuake;
-
-    @OneToOne(mappedBy = "weather", cascade=CascadeType.ALL)
-    private Wind wind;
-
-    public List<Precipitation> getPrecipitations() {
-        return precipitations;
-    }
-
-    public void setPrecipitations(List<Precipitation> precipitations) {
-        this.precipitations = precipitations;
     }
 
     public long getId() {
@@ -56,19 +41,11 @@ public class Weather {
         this.id = id;
     }
 
-    public EarthQuake getEarthQuake() {
-        return earthQuake;
+    public List<EventValue> getEventValues() {
+        return eventValues;
     }
 
-    public void setEarthQuake(EarthQuake earthQuake) {
-        this.earthQuake = earthQuake;
-    }
-
-    public Wind getWind() {
-        return wind;
-    }
-
-    public void setWind(Wind wind) {
-        this.wind = wind;
+    public void setEventValues(List<EventValue> eventValues) {
+        this.eventValues = eventValues;
     }
 }

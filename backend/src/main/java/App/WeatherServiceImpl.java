@@ -1,22 +1,22 @@
 package App;
 
+import App.dao.EventRepository;
 import App.dao.WeatherRepository;
-import App.dto.*;
-import App.model.EarthQuake;
-import App.model.Precipitation;
+import App.dto.WeatherDto;
+import App.model.Event;
+import App.model.EventValue;
 import App.model.Weather;
-import App.model.Wind;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 @Service
 public class WeatherServiceImpl implements WeatherService {
@@ -25,6 +25,9 @@ public class WeatherServiceImpl implements WeatherService {
 
     @Autowired
     private WeatherRepository repository;
+
+    @Autowired
+    private EventRepository eventRepository;
 
     public void setRepository(WeatherRepository repository) {
         this.repository = repository;
@@ -43,23 +46,29 @@ public class WeatherServiceImpl implements WeatherService {
     private WeatherDto weatherDaoToDto(Weather weatherDao) {
 
         WeatherDto weatherDto = new WeatherDto();
-        weatherDto.setEvents(new ArrayList<>());
         weatherDto.setDate(weatherDao.getDate());
         weatherDto.setId(weatherDao.getId());
+        weatherDto.setEvents(new ArrayList<>());
 
-        EarthQuake earthQuake = weatherDao.getEarthQuake();
-        Wind wind = weatherDao.getWind();
-        List<Precipitation> precipitations = weatherDao.getPrecipitations();
+        Map<Event, List<EventValue>> valuesByEvent = new HashMap<>();
 
-        if (earthQuake != null)
-            weatherDto.getEvents().add(new EarthQuakeDto("earthQuake", earthQuake.getMagnitudeScaleValue()));
+        weatherDao.getEventValues().forEach(
+                eventValue -> {
+                    Event event = eventValue.getParameter().getEvent();
+                    valuesByEvent.computeIfAbsent(event, k -> new ArrayList<>());
+                    valuesByEvent.get(event).add(eventValue);
+                    valuesByEvent.put(event, valuesByEvent.get(event));
+                }
+        );
 
-        if (wind != null)
-            weatherDto.getEvents().add(new WindDto("wind", wind.getSpeed(), wind.getName()));
-
-        precipitations.stream().forEach(p -> {
-            weatherDto.getEvents().add(
-                    new PrecipitationDto("precipitation", p.getNumberOfDailyAllowances(), p.getIntensity(), p.getTemperature(), p.getTemperature() <= 0 ? "snow" : "rain"));
+        valuesByEvent.forEach((event, eventValues) ->
+        {
+            HashMap<String, String> map = new HashMap<>();
+            map.put("type", event.getName());
+            eventValues.forEach(eventValue -> {
+                map.put(eventValue.getParameter().getName(), eventValue.getValue());
+            });
+            weatherDto.getEvents().add(map);
         });
 
         return weatherDto;
@@ -79,35 +88,46 @@ public class WeatherServiceImpl implements WeatherService {
 
     private Weather weatherDtoToDao(WeatherDto weather) {
         Weather weatherDao = new Weather();
+        weatherDao.setEventValues(new ArrayList<>());
         weatherDao.setDate(weather.getDate());
 
-        if (weather.getEvents() == null)
-            return weatherDao;
+        weather.getEvents().stream().forEach(e -> {
+            String type = e.get("type");
+            Event event = eventRepository.findByName(type).orElse(null);
+            if (event == null)
+                throw new IllegalArgumentException("event type not found");
 
-        EarthQuakeDto earthQuake = (EarthQuakeDto) weather.getEvents().stream().filter(event -> event.getClass().isAssignableFrom(EarthQuakeDto.class)).findFirst().orElse(null);
-        if (earthQuake != null) {
-            EarthQuake earthQuakeDao = new EarthQuake(earthQuake);
-            earthQuakeDao.setWeather(weatherDao);
-            weatherDao.setEarthQuake(earthQuakeDao);
-        }
+            addNames(e, type);
 
-        WindDto wind = (WindDto) weather.getEvents().stream().filter(event -> event.getClass().isAssignableFrom(WindDto.class)).findFirst().orElse(null);
-        if (wind != null) {
-            wind.setName(getWindName(wind.getSpeed()));
-            Wind windDao = new Wind(wind);
-            windDao.setWeather(weatherDao);
-            weatherDao.setWind(windDao);
-        }
+            event.getParameters().stream().forEach(p ->
+            {
+                String value = e.get(p.getName());
+                if (value == null)
+                    return;
 
-        List<Event> precipitations = weather.getEvents().stream().filter(event -> event.getClass().isAssignableFrom(PrecipitationDto.class)).collect(Collectors.toList());
-        List<Precipitation> precipitationDao = precipitations.stream().map(p -> {
-            Precipitation precipitation = new Precipitation((PrecipitationDto) p);
-            precipitation.setWeather(weatherDao);
-            return precipitation;
-        }).collect(Collectors.toList());
-        weatherDao.setPrecipitations(precipitationDao);
+                EventValue eventValue = new EventValue();
+                eventValue.setParameter(p);
+                eventValue.setWeather(weatherDao);
+                eventValue.setValue(value);
+                weatherDao.getEventValues().add(eventValue);
+            });
+        });
 
         return weatherDao;
+    }
+
+    private void addNames(Map<String, String> e, String type) {
+        if (type.equals("wind")) {
+            String speed = e.get("speed");
+            if (speed == null) throw new IllegalArgumentException("wind speed not found");
+            e.put("name", getWindName(Float.parseFloat(speed)));
+        }
+
+        if (type.equals("precipitation")) {
+            String temperature = e.get("temperature");
+            if (temperature == null) throw new IllegalArgumentException("temperature not found");
+            e.put("name", Float.parseFloat(temperature) > 0 ? "rain" : "snow");
+        }
     }
 
     private String getWindName(float speed) {
